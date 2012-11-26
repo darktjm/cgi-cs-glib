@@ -22,6 +22,9 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 %
+% Additional modifications released with no additional restrictions by
+% Thomas J. Moore.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%% requires build
@@ -35,13 +38,7 @@
 \else
 \def\putlogo#1{\HCode{<img src="#1" alt="Indiana University" width=400 />}}
 \fi
-\author{Thomas J. Moore\\
-% This is external material, not covered by the usual makefile
-% http://visualidentity.iu.edu/downloads/media/marks/iu_h_rgb.jpg
-% since it may disappear on the web, it's attached to the PDF:
-\embedfile{iu_h_rgb.jpg}%
-\putlogo{iu_h_rgb.jpg}\\
-UITS --- Research Technology --- Research Storage}
+\author{Thomas J. Moore}
 \date{Version 1.0 Revision \RCSRevision\\2010}
 
 \maketitle
@@ -57,14 +54,16 @@ system.  It also provides some useful generic template extensions.
 
 \vspace{0.25in}
 
-© 2008--2010 Trustees of Indiana University.  This document is licensed under
-the Apache License, Version 2.0 (the ``License''); you may not use this
-document except in compliance with the License. You may obtain a copy of the
-License at \url{http://www.apache.org/licenses/LICENSE-2.0}.  Unless
-required by applicable law or agreed to in writing, software distributed
-under the License is distributed on an ``AS IS'' BASIS, WITHOUT WARRANTIES OR
-CONDITIONS OF ANY KIND, either express or implied. See the License for the
-specific language governing permissions and limitations under the License.
+\copyright{} 2008--2010 Trustees of Indiana University.  This document
+is licensed under the Apache License, Version 2.0 (the ``License'');
+you may not use this document except in compliance with the License.
+You may obtain a copy of the License at
+\url{http://www.apache.org/licenses/LICENSE-2.0}.  Unless required by
+applicable law or agreed to in writing, software distributed under the
+License is distributed on an ``AS IS'' BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for
+the specific language governing permissions and limitations under the
+License.
 
 \vspace{0.25in}
 

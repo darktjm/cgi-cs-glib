@@ -22,6 +22,9 @@
 % See the License for the specific language governing permissions and
 % limitations under the License.
 %
+% Additional modifications released with no additional restrictions by
+% Thomas J. Moore.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%% requires cgi-supt
@@ -35,13 +38,7 @@
 \else
 \def\putlogo#1{\HCode{<img src="#1" alt="Indiana University" width=400 />}}
 \fi
-\author{Thomas J. Moore\\
-% This is external material, not covered by the usual makefile
-% http://visualidentity.iu.edu/downloads/media/marks/iu_h_rgb.jpg
-% since it may disappear on the web, it's attached to the PDF:
-\embedfile{iu_h_rgb.jpg}%
-\putlogo{iu_h_rgb.jpg}\\
-UITS --- Research Technology --- Research Storage}
+\author{Thomas J. Moore}
 \date{Version 1.0 Revision \RCSRevision\\2009}
 
 \maketitle
