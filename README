@@ -1,0 +1,5 @@
+This is another sample using my literate build system.  It is a
+library for doing CGI programs in C using GLib and ClearSilver.  It
+was a work in progress when I abandoned due to lack of a need any
+more.  It was intended to support a dynamic WebDAV interface to a file
+service, as well as plain interfaces to other utilities.
