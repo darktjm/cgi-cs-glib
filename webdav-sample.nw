@@ -1,0 +1,4864 @@
+% -*- mode: Noweb; noweb-code-mode: c-mode; -*-
+\documentclass[twoside,english]{article}
+\usepackage[letterpaper,rmargin=1.5in,bmargin=1in]{geometry}
+%%% latex preamble
+\RCS $Id$
+\RCS $Revision$
+% Build with noweb:
+%  notangle -t8 build.nw > makefile
+%  make
+%
+% Copyright 2009 Trustees of Indiana University
+%
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+%
+%   http://www.apache.org/licenses/LICENSE-2.0
+%
+% Unless required by applicable law or agreed to in writing, software
+% distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and
+% limitations under the License.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% requires cgi-supt
+
+\begin{document}
+
+\title{Sample WebDAV requests}
+\def\putlogo#1{\includegraphics[width=0.5\textwidth]{#1}}
+% l2h macro putlogo 1 <img src="#$1" alt="Indiana University" width=400 />
+\ifpdf
+\else
+\def\putlogo#1{\HCode{<img src="#1" alt="Indiana University" width=400 />}}
+\fi
+\author{Thomas J. Moore\\
+% This is external material, not covered by the usual makefile
+% http://visualidentity.iu.edu/downloads/media/marks/iu_h_rgb.jpg
+% since it may disappear on the web, it's attached to the PDF:
+\embedfile{iu_h_rgb.jpg}%
+\putlogo{iu_h_rgb.jpg}\\
+UITS --- Research Technology --- Research Storage}
+\date{Version 1.0 Revision \RCSRevision\\2009}
+
+\maketitle
+
+\section{Samples}
+
+These are extracted from the various WebDAV standards.
+
+\lstset{language=xml}
+<<test-http-rfc3253-1.6.1>>=
+CHECKOUT /foot.html HTTP/1.1
+Host: www.webdav.org
+@
+
+<<response-http-rfc3253-1.6.1>>=
+HTTP/1.1 409 Conflict
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+ <D:must-be-checked-in/>
+</D:error>
+@
+
+<<test-http-rfc3253-3.5.1>>=
+VERSION-CONTROL /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-3.5.1>>=
+HTTP/1.1 200 OK
+@
+
+<<test-http-rfc3253-3.7.1>>=
+REPORT /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:version-tree xmlns:D="DAV:">
+ <D:prop>
+   <D:version-name/>
+   <D:creator-displayname/>
+   <D:successor-set/>
+ </D:prop>
+</D:version-tree>
+@
+
+<<response-http-rfc3253-3.7.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+   <D:href>http://repo.webdav.org/his/23/ver/V1</D:href>
+   <D:propstat>
+     <D:prop>
+       <D:version-name>V1</D:version-name>
+       <D:creator-displayname>Fred</D:creator-displayname>
+       <D:successor-set>
+         <D:href>http://repo.webdav.org/his/23/ver/V2</D:href>
+         <D:href>http://repo.webdav.org/his/23/ver/V2.1.1</D:href>
+       </D:successor-set>
+     </D:prop>
+     <D:status>HTTP/1.1 200 OK</D:status>
+   </D:propstat>
+ </D:response>
+ <D:response>
+   <D:href>http://repo.webdav.org/his/23/ver/V2</D:href>
+   <D:propstat>
+     <D:prop>
+       <D:version-name>V2</D:version-name>
+       <D:creator-displayname>Fred</D:creator-displayname>
+       <D:successor-set/>
+     </D:prop>
+     <D:status>HTTP/1.1 200 OK</D:status>
+   </D:propstat>
+ </D:response>
+ <D:response>
+   <D:href>http://repo.webdav.org/his/23/ver/V2.1.1</D:href>
+   <D:propstat>
+     <D:prop>
+       <D:version-name>V2.1.1</D:version-name>
+       <D:creator-displayname>Sally</D:creator-displayname>
+       <D:successor-set/>
+     </D:prop>
+     <D:status>HTTP/1.1 200 OK</D:status>
+   </D:propstat>
+ </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3253-3.8.1>>=
+REPORT /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:expand-property xmlns:D="DAV:">
+ <D:property name="version-history">
+   <D:property name="version-set">
+     <D:property name="creator-displayname"/>
+     <D:property name="activity-set"/>
+   </D:property>
+ </D:property>
+</D:expand-property>
+@
+
+<<response-http-rfc3253-3.8.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+   <D:href>http://www.webdav.org/foo.html</D:href>
+   <D:propstat>
+     <D:prop>
+       <D:version-history>
+         <D:response>
+           <D:href>http://repo.webdav.org/his/23</D:href>
+           <D:propstat>
+             <D:prop>
+               <D:version-set>
+                 <D:response>
+<D:href>http://repo.webdav.org/his/23/ver/1</D:href>
+                   <D:propstat>
+                     <D:prop>
+<D:creator-displayname>Fred</D:creator-displayname>
+                       <D:activity-set> <D:href>
+                         http://www.webdav.org/ws/dev/sally
+                       </D:href> </D:activity-set> </D:prop>
+                     <D:status>HTTP/1.1 200 OK</D:status>
+                   </D:propstat> </D:response>
+                 <D:response>
+<D:href>http://repo.webdav.org/his/23/ver/2</D:href>
+                   <D:propstat>
+                     <D:prop>
+<D:creator-displayname>Sally</D:creator-displayname>
+                       <D:activity-set>
+<D:href>http://repo.webdav.org/act/add-refresh-cmd</D:href>
+                       </D:activity-set> </D:prop>
+                     <D:status>HTTP/1.1 200 OK</D:status>
+                   </D:propstat> </D:response>
+               </D:version-set> </D:prop>
+             <D:status>HTTP/1.1 200 OK</D:status>
+           </D:propstat> </D:response>
+       </D:version-history> </D:prop>
+     <D:status>HTTP/1.1 200 OK</D:status>
+   </D:propstat> </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3253-4.3.1>>=
+CHECKOUT /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-4.3.1>>=
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-4.4.1>>=
+CHECKIN /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-4.4.1>>=
+HTTP/1.1 201 Created
+Location: http://repo.webdav.org/his/23/ver/32
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-4.5.1>>=
+UNCHECKOUT /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-4.5.1>>=
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-5.4.1>>=
+REPORT /ws/public HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:locate-by-history xmlns:D="DAV:">
+ <D:version-history-set>
+   <D:href>http://repo.webdav.org/his/23</D:href>
+   <D:href>http://repo.webdav.org/his/84</D:href>
+   <D:href>http://repo.webdav.org/his/129</D:href>
+ </D:version-history-set>
+ <D:prop>
+   <D:version-history/>
+ </D:prop>
+</D:locate-by-history>
+@
+
+<<response-http-rfc3253-5.4.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+   <D:href>http://www.webdav.org/ws/public/x/test.html</D:href>
+   <D:propstat>
+     <D:prop>
+       <D:version-history>
+         <D:href>http://repo.webdav.org/his/23</D:href>
+       </D:version-history>
+     </D:prop>
+     <D:status>HTTP/1.1 200 OK</D:status>
+   </D:propstat>
+ </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3253-6.3.1>>=
+MKWORKSPACE /ws/public HTTP/1.1
+Host: www.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-6.3.1>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-6.4.1>>=
+OPTIONS /doc HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:options xmlns:D="DAV:">
+  <D:version-history-collection-set/>
+  <D:workspace-collection-set/>
+</D:options>
+@
+
+<<response-http-rfc3253-6.4.1>>=
+HTTP/1.1 200 OK
+DAV: 1
+DAV: version-control,checkout-in-place,version-history,workspace
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:options-response xmlns:D="DAV:">
+  <D:version-history-collection-set>
+    <D:href>http://repo.webdav.org/his</D:href>
+  </D:version-history-collection-set>
+  <D:workspace-collection-set>
+    <D:href>http://www.webdav.org/public/ws</D:href>
+    <D:href>http://www.webdav.org/private/ws</D:href>
+  </D:workspace-collection-set>
+</D:options-response>
+@
+
+<<test-http-rfc3253-6.7.1>>=
+VERSION-CONTROL /ws/public/bar.html HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:version-control xmlns:D="DAV:">
+  <D:version>
+    <D:href>http://repo.webdav.org/his/12/ver/V3</D:href>
+  </D:version>
+</D:version-control>
+@
+
+<<response-http-rfc3253-6.7.1>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-7.1.1>>=
+UPDATE /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:update xmlns:D="DAV:">
+  <D:version>
+    <D:href>http://repo.webdav.org/his/23/ver/33</D:href>
+  </D:version>
+</D:update>
+@
+
+<<response-http-rfc3253-7.1.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Cache-Control: no-cache
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+ <D:response>
+   <D:href>http://www.webdav.org/foo.html</D:href>
+   <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3253-8.2.1>>=
+LABEL /foo.html HTTP/1.1
+Host: www.webdav.org
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:label xmlns:D="DAV:">
+  <D:set>
+    <D:label-name>default</D:label-name>
+  </D:set>
+</D:label>
+@
+
+<<response-http-rfc3253-8.2.1>>=
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-9.3.1>>=
+CHECKOUT /his/12/ver/V3 HTTP/1.1
+Host: repo.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-9.3.1>>=
+HTTP/1.1 201 Created
+Location: http://repo.webdav.org/wr/157
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-9.4.1>>=
+CHECKIN /wr/157 HTTP/1.1
+Host: repo.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-9.4.1>>=
+HTTP/1.1 201 Created
+Location: http://repo.webdav.org/his/23/ver/15
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-11.2.1>>=
+MERGE /ws/public HTTP/1.1
+Host: www.webdav.org
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:merge xmlns:D="DAV:">
+  <D:source>
+    <D:href>http://www.webdav.org/ws/dev/sally</D:href>
+  </D:source>
+</D:merge>
+@
+
+<<response-http-rfc3253-11.2.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Cache-Control: no-cache
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.webdav.org/ws/public/src/parse.c</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+  <D:response>
+    <D:href>http://www.webdav.org/ws/public/doc/parse.html</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3253-11.3.1>>=
+REPORT /ws/public HTTP/1.1
+Host: www.webdav.org
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:merge-preview xmlns:D="DAV:">
+  <D:source>
+    <D:href>http://www.webdav.org/ws/dev/fred</D:href>
+  </D:source>
+</D:merge-preview>
+@
+
+<<response-http-rfc3253-11.3.1>>=
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:merge-preview-report xmlns:D="DAV:">
+  <D:conflict-preview>
+    <D:target>
+      <D:href>http://www.webdav.org/ws/public/foo.html</D:href>
+    </D:target>
+    <D:common-ancestor>
+      <D:href>http://repo.webdav.org/his/23/ver/18</D:href>
+    </D:common-ancestor>
+    <D:version>
+      <D:href>http://repo.webdav.org/his/23/ver/42</D:href>
+    </D:version>
+  </D:conflict-preview>
+  <D:update-preview>
+    <D:target>
+      <D:href>http://www.webdav.org/ws/public/bar.html</D:href>
+    </D:target>
+    <D:version>
+      <D:href>http://www.repo/his/42/ver/3</D:href>
+    </D:version>
+  </D:update-preview>
+</D:merge-preview-report>
+@
+
+<<test-http-rfc3253-12.6.1>>=
+BASELINE-CONTROL /src HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:baseline-control xmlns:D="DAV:">
+  <D:href>http://www.webdav.org/repo/blh/13/ver/8</D:href>
+</D:baseline-control>
+@
+
+<<response-http-rfc3253-12.6.1>>=
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Length: 0
+@
+
+<<test-http-rfc3253-12.7.1>>=
+REPORT /bl-his/12/bl/14 HTTP/1.1
+Host: repo.webdav.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:compare-baseline xmlns:D="DAV:">
+  <D:href>http://repo.webdav.org/bl-his/12/bl/15</D:href>
+</D:compare-baseline>
+@
+
+<<response-http-rfc3253-12.7.1>>=
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:compare-baseline-report xmlns:D="DAV:">
+  <D:added-version>
+    <D:href>http://repo.webdav.org/his/23/ver/8</D:href>
+  </D:added-version>
+  <D:changed-version>
+    <D:href>http://repo.webdav.org/his/29/ver/12</D:href>
+    <D:href>http://repo.webdav.org/his/29/ver/19</D:href>
+  </D:changed-version>
+  <D:deleted-version>
+    <D:href>http://repo.webdav.org/his/12/ver/4</D:href>
+  </D:deleted-version>
+</D:compare-baseline-report>
+@
+
+<<test-http-rfc3253-13.5.1>>=
+MKACTIVITY /act/test-23 HTTP/1.1
+Host: repo.webdav.org
+Content-Length: 0
+@
+
+<<response-http-rfc3253-13.5.1>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3253-13.10.1>>=
+CHECKOUT /ws/public/foo.html HTTP/1.1
+Host: www.webdav.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:checkout xmlns:D="DAV:">
+  <D:activity-set>
+    <D:href>http://repo.webdav.org/act/fix-bug-23</D:href>
+  </D:activity-set>
+</D:checkout>
+@
+
+<<response-http-rfc3253-13.10.1>>=
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+@
+
+<<test-http-rfc3648-5.2>>=
+MKCOL /theNorth/ HTTP/1.1
+Host: example.org
+Ordering-Type: http://example.org/orderings/compass.html
+@
+
+<<response-http-rfc3648-5.2>>=
+HTTP/1.1 201 Created
+@
+
+<<test-http-rfc3648-6.2a>>=
+COPY /~user/dav/spec08.html HTTP/1.1
+Host: example.org
+Destination: http://example.org/~slein/dav/spec08.html
+Position: after requirements.html
+@
+
+<<response-http-rfc3648-6.2a>>=
+HTTP/1.1 201 Created
+@
+
+<<test-http-rfc3648-6.2b>>=
+MOVE /i-d/draft-webdav-prot-08.txt HTTP/1.1
+Host: example.org
+Destination: http://example.org/~user/dav/draft-webdav-prot-08.txt
+Position: first
+@
+
+<<response-http-rfc3648-6.2b>>=
+HTTP/1.1 409 Conflict
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+  <D:collection-must-be-ordered/>
+</D:error>
+@
+
+<<test-http-rfc3648-7.1>>=
+ORDERPATCH /coll-1/ HTTP/1.1
+Host: example.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" ?>
+<d:orderpatch xmlns:d="DAV:">
+   <d:ordering-type>
+      <d:href>http://example.org/inorder.ord</d:href>
+   </d:ordering-type>
+   <d:order-member>
+      <d:segment>two.html</d:segment>
+      <d:position><d:first/></d:position>
+   </d:order-member>
+   <d:order-member>
+      <d:segment>one.html</d:segment>
+      <d:position><d:first/></d:position>
+   </d:order-member>
+   <d:order-member>
+      <d:segment>three.html</d:segment>
+      <d:position><d:last/></d:position>
+   </d:order-member>
+   <d:order-member>
+      <d:segment>four.html</d:segment>
+      <d:position><d:last/></d:position>
+   </d:order-member>
+</d:orderpatch>
+@
+
+<<response-http-rfc3648-7.1>>=
+HTTP/1.1 200 OK
+@
+
+<<test-http-rfc3648-7.2>>=
+ORDERPATCH /coll-1/ HTTP/1.1
+Host: www.nunanet.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" ?>
+<d:orderpatch xmlns:d="DAV:">
+   <d:order-member>
+      <d:segment>nunavut.desc</d:segment>
+      <d:position>
+         <d:after>
+            <d:segment>nunavut.map</d:segment>
+         </d:after>
+      </d:position>
+   </d:order-member>
+   <d:order-member>
+      <d:segment>iqaluit.map</d:segment>
+      <d:position>
+         <d:after>
+            <d:segment>pangnirtung.img</d:segment>
+         </d:after>
+      </d:position>
+   </d:order-member>
+</d:orderpatch>
+@
+
+<<response-http-rfc3648-7.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" ?>
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>http://www.nunanet.com/coll-1/iqaluit.map</d:href>
+    <d:status>HTTP/1.1 403 Forbidden</d:status>
+    <d:responsedescription>
+      <d:error><d:segment-must-identify-member/></d:error>
+      pangnirtung.img is not a collection member.
+    </d:responsedescription>
+  </d:response>
+</d:multistatus>
+@
+
+<<test-http-rfc3648-8.1>>=
+PROPFIND /MyColl/ HTTP/1.1
+Host: example.org
+Depth: 1
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop xmlns:J="http://example.org/jsprops/">
+    <D:ordering-type/>
+    <D:resourcetype/>
+    <J:latitude/>
+ </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3648-8.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:J="http://example.org/jsprops/">
+   <D:response>
+      <D:href>http://example.org/MyColl/</D:href>
+      <D:propstat>
+         <D:prop>
+            <D:ordering-type>
+               <D:href>DAV:custom</D:href>
+            </D:ordering-type>
+            <D:resourcetype><D:collection/></D:resourcetype>
+         </D:prop>
+         <D:status>HTTP/1.1 200 OK</D:status>
+      </D:propstat>
+      <D:propstat>
+         <D:prop>
+            <J:latitude/>
+         </D:prop>
+         <D:status>HTTP/1.1 404 Not Found</D:status>
+      </D:propstat>
+   </D:response>
+   <D:response>
+      <D:href>http://example.org/MyColl/lakehazen.html</D:href>
+      <D:propstat>
+         <D:prop>
+            <D:resourcetype/>
+            <J:latitude>82N</J:latitude>
+         </D:prop>
+         <D:status>HTTP/1.1 200 OK</D:status>
+      </D:propstat>
+      <D:propstat>
+         <D:prop>
+            <D:ordering-type/>
+         </D:prop>
+         <D:status>HTTP/1.1 404 Not Found</D:status>
+      </D:propstat>
+   </D:response>
+   <D:response>
+      <D:href
+      >http://example.org/MyColl/siorapaluk.html</D:href>
+      <D:propstat>
+         <D:prop>
+            <D:resourcetype/>
+            <J:latitude>78N</J:latitude>
+         </D:prop>
+         <D:status>HTTP/1.1 200 OK</D:status>
+      </D:propstat>
+      <D:propstat>
+         <D:prop>
+            <D:ordering-type/>
+         </D:prop>
+         <D:status>HTTP/1.1 404 Not Found</D:status>
+      </D:propstat>
+   </D:response>
+   <D:response>
+      <D:href>http://example.org/MyColl/iqaluit.html</D:href>
+      <D:propstat>
+         <D:prop>
+            <D:resourcetype/>
+            <J:latitude>62N</J:latitude>
+         </D:prop>
+         <D:status>HTTP/1.1 200 OK</D:status>
+      </D:propstat>
+      <D:propstat>
+         <D:prop>
+            <D:ordering-type/>
+         </D:prop>
+         <D:status>HTTP/1.1 404 Not Found</D:status>
+      </D:propstat>
+   </D:response>
+   <D:response>
+      <D:href>http://example.org/MyColl/newyork.html</D:href>
+      <D:propstat>
+         <D:prop>
+            <D:resourcetype/>
+            <J:latitude>45N</J:latitude>
+         </D:prop>
+         <D:status>HTTP/1.1 200 OK</D:status>
+      <D:propstat>
+         <D:prop>
+            <D:ordering-type/>
+         </D:prop>
+         <D:status>HTTP/1.1 404 Not Found</D:status>
+      </D:propstat>
+      </D:propstat>
+   </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3648-10.1>>=
+OPTIONS /somecollection/ HTTP/1.1
+Host: example.org
+@
+
+<<response-http-rfc3648-10.1>>=
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, COPY, MOVE
+Allow: MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, ORDERPATCH
+DAV: 1, 2, ordered-collections
+@
+
+<<test-http-rfc3648-10.2>>=
+ROPFIND /somecollection HTTP/1.1
+Depth: 0
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<propfind xmlns="DAV:">
+  <prop>
+    <supported-live-property-set/>
+    <supported-method-set/>
+  </prop>
+</propfind>
+@
+
+<<response-http-rfc3648-10.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<multistatus xmlns="DAV:">
+  <response>
+    <href>http://example.org/somecollection</href>
+    <propstat>
+      <prop>
+        <supported-live-property-set>
+          <supported-live-property>
+            <prop><ordering-type/></prop>
+          </supported-live-property>
+          <!-- ... other live properties omitted for brevity ... -->
+        </supported-live-property-set>
+        <supported-method-set>
+          <supported-method name="COPY" />
+          <supported-method name="DELETE" />
+          <supported-method name="GET" />
+          <supported-method name="HEAD" />
+          <supported-method name="LOCK" />
+          <supported-method name="MKCOL" />
+          <supported-method name="MOVE" />
+          <supported-method name="OPTIONS" />
+          <supported-method name="ORDERPATCH" />
+          <supported-method name="POST" />
+          <supported-method name="PROPFIND" />
+          <supported-method name="PROPPATCH" />
+          <supported-method name="PUT" />
+          <supported-method name="TRACE" />
+          <supported-method name="UNLOCK" />
+        </supported-method-set>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+</multistatus>
+@
+
+<<test-http-rfc3744-5.1.1>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="jim",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:owner/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.1.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:owner>
+          <D:href>http://www.example.com/acl/users/gstein</D:href>
+        </D:owner>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.1.2>>=
+PROPPATCH /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="jim",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propertyupdate xmlns:D="DAV:">
+  <D:set>
+    <D:prop>
+      <D:owner>
+        <D:href>http://www.example.com/acl/users/jim</D:href>
+      </D:owner>
+    </D:prop>
+  </D:set>
+</D:propertyupdate>
+@
+
+<<response-http-rfc3744-5.1.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop><D:owner/></D:prop>
+      <D:status>HTTP/1.1 403 Forbidden</D:status>
+      <D:responsedescription>
+        <D:error><D:cannot-modify-protected-property/></D:error>
+        Failure to set protected property (DAV:owner)
+      </D:responsedescription>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.3.1>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="gclemm",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:supported-privilege-set/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.3.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:supported-privilege-set>
+          <D:supported-privilege>
+            <D:privilege><D:all/></D:privilege>
+           <D:abstract/>
+            <D:description xml:lang="en">
+              Any operation
+            </D:description>
+            <D:supported-privilege>
+              <D:privilege><D:read/></D:privilege>
+              <D:description xml:lang="en">
+                Read any object
+              </D:description>
+              <D:supported-privilege>
+                <D:privilege><D:read-acl/></D:privilege>
+                <D:abstract/>
+                <D:description xml:lang="en">Read ACL</D:description>
+              </D:supported-privilege>
+              <D:supported-privilege>
+                <D:privilege>
+                  <D:read-current-user-privilege-set/>
+                </D:privilege>
+                <D:abstract/>
+                <D:description xml:lang="en">
+                  Read current user privilege set property
+                </D:description>
+              </D:supported-privilege>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><D:write/></D:privilege>
+              <D:description xml:lang="en">
+                Write any object
+              </D:description>
+              <D:supported-privilege>
+                <D:privilege><D:write-acl/></D:privilege>
+                <D:description xml:lang="en">
+                  Write ACL
+                </D:description>
+                <D:abstract/>
+              </D:supported-privilege>
+              <D:supported-privilege>
+                <D:privilege><D:write-properties/></D:privilege>
+                <D:description xml:lang="en">
+                  Write properties
+                </D:description>
+              </D:supported-privilege>
+              <D:supported-privilege>
+                <D:privilege><D:write-content/></D:privilege>
+                <D:description xml:lang="en">
+                  Write resource content
+                </D:description>
+              </D:supported-privilege>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><D:unlock/></D:privilege>
+              <D:description xml:lang="en">
+                Unlock resource
+              </D:description>
+            </D:supported-privilege>
+          </D:supported-privilege>
+        </D:supported-privilege-set>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.4.1>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="khare",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:current-user-privilege-set/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.4.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+  <D:href>http://www.example.com/papers/</D:href>
+  <D:propstat>
+    <D:prop>
+      <D:current-user-privilege-set>
+        <D:privilege><D:read/></D:privilege>
+      </D:current-user-privilege-set>
+    </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.5.5>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="masinter",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:acl/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.5.5>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:acl>
+        <D:ace>
+          <D:principal>
+            <D:href
+            >http://www.example.com/acl/groups/maintainers</D:href>
+          </D:principal>
+          <D:grant>
+            <D:privilege><D:write/></D:privilege>
+          </D:grant>
+        </D:ace>
+        <D:ace>
+          <D:principal>
+            <D:all/>
+          </D:principal>
+          <D:grant>
+            <D:privilege><D:read/></D:privilege>
+          </D:grant>
+        </D:ace>
+      </D:acl>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.6.5>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="srcarter",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:acl-restrictions/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.6.5>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:acl-restrictions>
+          <D:grant-only/>
+          <D:required-principal>
+            <D:all/>
+          </D:required-principal>
+        </D:acl-restrictions>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.8.1>>=
+PROPFIND /papers/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="yarong",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:principal-collection-set/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.8.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/papers/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:principal-collection-set>
+          <D:href>http://www.example.com/acl/users/</D:href>
+          <D:href>http://www.example.com/acl/groups/</D:href>
+        </D:principal-collection-set>
+      </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-5.9>>=
+PROPFIND /top/container/ HTTP/1.1
+Host: www.example.com
+Content-type: text/xml; charset="utf-8"
+Content-Length: xxx
+Depth: 0
+Authorization: Digest username="ejw",
+  realm="users@example.com", nonce="...",
+  uri="/top/container/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:owner/>
+    <D:supported-privilege-set/>
+    <D:current-user-privilege-set/>
+    <D:acl/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc3744-5.9>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:A="http://www.example.com/acl/">
+  <D:response>
+    <D:href>http://www.example.com/top/container/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:owner>
+          <D:href>http://www.example.com/users/gclemm</D:href>
+        </D:owner>
+        <D:supported-privilege-set>
+          <D:supported-privilege>
+            <D:privilege><D:all/></D:privilege>
+            <D:abstract/>
+            <D:description xml:lang="en">
+              Any operation
+            </D:description>
+            <D:supported-privilege>
+              <D:privilege><D:read/></D:privilege>
+              <D:description xml:lang="en">
+                Read any object
+              </D:description>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><D:write/></D:privilege>
+              <D:abstract/>
+              <D:description xml:lang="en">
+                Write any object
+              </D:description>
+              <D:supported-privilege>
+                <D:privilege><A:create/></D:privilege>
+                <D:description xml:lang="en">
+                  Create an object
+                </D:description>
+              </D:supported-privilege>
+              <D:supported-privilege>
+                <D:privilege><A:update/></D:privilege>
+                <D:description xml:lang="en">
+                  Update an object
+                </D:description>
+              </D:supported-privilege>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><A:delete/></D:privilege>
+              <D:description xml:lang="en">
+                Delete an object
+              </D:description>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><D:read-acl/></D:privilege>
+              <D:description xml:lang="en">
+                Read the ACL
+              </D:description>
+            </D:supported-privilege>
+            <D:supported-privilege>
+              <D:privilege><D:write-acl/></D:privilege>
+              <D:description xml:lang="en">
+                Write the ACL
+              </D:description>
+            </D:supported-privilege>
+          </D:supported-privilege>
+        </D:supported-privilege-set>
+        <D:current-user-privilege-set>
+          <D:privilege><D:read/></D:privilege>
+          <D:privilege><D:read-acl/></D:privilege>
+        </D:current-user-privilege-set>
+        <D:acl>
+          <D:ace>
+            <D:principal>
+              <D:href>http://www.example.com/users/esedlar</D:href>
+            </D:principal>
+            <D:grant>
+              <D:privilege><D:read/></D:privilege>
+              <D:privilege><D:write/></D:privilege>
+              <D:privilege><D:read-acl/></D:privilege>
+            </D:grant>
+          </D:ace>
+          <D:ace>
+            <D:principal>
+              <D:href>http://www.example.com/groups/mrktng</D:href>
+            </D:principal>
+            <D:deny>
+              <D:privilege><D:read/></D:privilege>
+            </D:deny>
+          </D:ace>
+          <D:ace>
+            <D:principal>
+              <D:property><D:owner/></D:property>
+            </D:principal>
+            <D:grant>
+              <D:privilege><D:read-acl/></D:privilege>
+              <D:privilege><D:write-acl/></D:privilege>
+            </D:grant>
+          </D:ace>
+          <D:ace>
+            <D:principal><D:all/></D:principal>
+            <D:grant>
+              <D:privilege><D:read/></D:privilege>
+            </D:grant>
+            <D:inherited>
+              <D:href>http://www.example.com/top</D:href>
+            </D:inherited>
+          </D:ace>
+        </D:acl>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-7.1.1>>=
+MOVE /a/b/ HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/c/d
+@
+
+<<response-http-rfc3744-7.1.1>>=
+HTTP/1.1 403 Forbidden
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<D:error xmlns:D="DAV:">
+  <D:need-privileges>
+    <D:resource>
+      <D:href>/a</D:href>
+      <D:privilege><D:unbind/></D:privilege>
+    </D:resource>
+    <D:resource>
+      <D:href>/c</D:href>
+      <D:privilege><D:bind/></D:privilege>
+    </D:resource>
+  </D:need-privileges>
+</D:error>
+@
+
+<<test-http-rfc3744-7.2.1>>=
+OPTIONS /foo.html HTTP/1.1
+Host: www.example.com
+Content-Length: 0
+@
+
+<<response-http-rfc3744-7.2.1>>=
+HTTP/1.1 200 OK
+DAV: 1, 2, access-control
+Allow: OPTIONS, GET, PUT, PROPFIND, PROPPATCH, ACL
+@
+
+<<test-http-rfc3744-8.1.2>>=
+ACL /top/container/ HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="fielding",
+  realm="users@example.com", nonce="...",
+  uri="/top/container/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:acl xmlns:D="DAV:">
+  <D:ace>
+    <D:principal>
+      <D:href>http://www.example.com/users/esedlar</D:href>
+    </D:principal>
+    <D:grant>
+      <D:privilege><D:read/></D:privilege>
+      <D:privilege><D:write/></D:privilege>
+    </D:grant>
+  </D:ace>
+  <D:ace>
+    <D:principal>
+      <D:property><D:owner/></D:property>
+    </D:principal>
+    <D:grant>
+      <D:privilege><D:read-acl/></D:privilege>
+      <D:privilege><D:write-acl/></D:privilege>
+    </D:grant>
+  </D:ace>
+  <D:ace>
+    <D:principal><D:all/></D:principal>
+    <D:grant>
+      <D:privilege><D:read/></D:privilege>
+    </D:grant>
+  </D:ace>
+</D:acl>
+@
+
+<<response-http-rfc3744-8.1.2>>=
+HTTP/1.1 200 OK
+@
+
+<<test-http-rfc3744-8.1.3>>=
+ACL /top/container/ HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="fielding",
+  realm="users@example.com", nonce="...",
+  uri="/top/container/", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:acl xmlns:D="DAV:">
+  <D:ace>
+    <D:principal>
+      <D:href>http://www.example.com/users/esedlar</D:href>
+    </D:principal>
+    <D:deny>
+      <D:privilege><D:write/></D:privilege>
+    </D:deny>
+  </D:ace>
+</D:acl>
+@
+
+<<response-http-rfc3744-8.1.3>>=
+HTTP/1.1 403 Forbidden
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+  <D:no-protected-ace-conflict/>
+</D:error>
+@
+
+<<test-http-rfc3744-8.1.4>>=
+ACL /top/index.html HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="ejw",
+  realm="users@example.com", nonce="...",
+  uri="/top/index.html", response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:acl xmlns:D="DAV:" xmlns:F="http://www.example.com/privs/">
+  <D:ace>
+    <D:principal>
+       <D:href>http://www.example.com/users/ejw</D:href>
+    </D:principal>
+    <D:grant><D:privilege><D:write/></D:privilege></D:grant>
+  </D:ace>
+</D:acl>
+@
+
+<<response-http-rfc3744-8.1.4>>=
+HTTP/1.1 403 Forbidden
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+  <D:no-inherited-ace-conflict/>
+</D:error>
+@
+
+<<test-http-rfc3744-8.1.5>>=
+ACL /diamond/engagement-ring.gif HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="ygoland",
+  realm="users@example.com", nonce="...",
+  uri="/diamond/engagement-ring.gif", response="...",
+  opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:acl xmlns:D="DAV:">
+  <D:ace>
+    <D:principal>
+      <D:href>http://www.example.com/users/friends</D:href>
+    </D:principal>
+    <D:grant><D:privilege><D:read/></D:privilege></D:grant>
+  </D:ace>
+  <D:ace>
+    <D:principal>
+      <D:href>http://www.example.com/users/ygoland-so</D:href>
+    </D:principal>
+    <D:deny><D:privilege><D:read/></D:privilege></D:deny>
+  </D:ace>
+</D:acl>
+@
+
+<<response-http-rfc3744-8.1.5>>=
+HTTP/1.1 400 Bad Request
+Content-Length: 0
+@
+
+<<test-http-rfc3744-9.2.1>>=
+REPORT /index.html HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Depth: 0
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:acl-principal-prop-set xmlns:D="DAV:">
+  <D:prop>
+    <D:displayname/>
+  </D:prop>
+</D:acl-principal-prop-set>
+@
+
+<<response-http-rfc3744-9.2.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/people/gstein</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:displayname>Greg Stein</D:displayname>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://www.example.com/groups/authors</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:displayname>Site authors</D:displayname>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-9.3.1>>=
+REPORT /doc/ HTTP/1.1
+Host: www.example.com
+Authorization: Digest username="gclemm",
+  realm="users@example.com", nonce="...",
+  uri="/papers/", response="...", opaque="..."
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+Depth: 0
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:principal-match xmlns:D="DAV:">
+  <D:principal-property>
+    <D:owner/>
+  </D:principal-property>
+</D:principal-match>
+@
+
+<<response-http-rfc3744-9.3.1>>=
+TTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/doc/foo.html</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+  <D:response>
+    <D:href>http://www.example.com/doc/img/bar.gif</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-9.4.2>>=
+REPORT /users/ HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset=utf-8
+Content-Length: xxxx
+Depth: 0
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:principal-property-search xmlns:D="DAV:">
+  <D:property-search>
+    <D:prop>
+      <D:displayname/>
+    </D:prop>
+    <D:match>doE</D:match>
+  </D:property-search>
+  <D:property-search>
+    <D:prop xmlns:B="http://www.example.com/ns/">
+      <B:title/>
+    </D:prop>
+    <D:match>Sales</D:match>
+  </D:property-search>
+  <D:prop xmlns:B="http://www.example.com/ns/">
+    <D:displayname/>
+    <B:department/>
+    <B:phone/>
+    <B:office/>
+    <B:salary/>
+  </D:prop>
+</D:principal-property-search>
+@
+
+<<response-http-rfc3744-9.4.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset=utf-8
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:" xmlns:B="http://BigCorp.com/ns/">
+  <D:response>
+    <D:href>http://www.example.com/users/jdoe</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:displayname>John Doe</D:displayname>
+        <B:department>Widget Sales</B:department>
+        <B:phone>234-4567</B:phone>
+        <B:office>209</B:office>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop>
+        <B:salary/>
+      </D:prop>
+      <D:status>HTTP/1.1 403 Forbidden</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://www.example.com/users/zsmith</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:displayname>Zygdoebert Smith</D:displayname>
+        <B:department>Gadget Sales</B:department>
+        <B:phone>234-7654</B:phone>
+        <B:office>114</B:office>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop>
+        <B:salary/>
+      </D:prop>
+      <D:status>HTTP/1.1 403 Forbidden</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc3744-9.5.1>>=
+REPORT /users/ HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+Accept-Language: en, de
+Authorization: BASIC d2FubmFtYWs6cGFzc3dvcmQ=
+Depth: 0
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:principal-search-property-set xmlns:D="DAV:"/>
+@
+
+<<response-http-rfc3744-9.5.1>>=
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:principal-search-property-set xmlns:D="DAV:">
+  <D:principal-search-property>
+    <D:prop>
+      <D:displayname/>
+    </D:prop>
+    <D:description xml:lang="en">Full name</D:description>
+  </D:principal-search-property>
+  <D:principal-search-property>
+    <D:prop xmlns:B="http://BigCorp.com/ns/">
+      <B:title/>
+    </D:prop>
+    <D:description xml:lang="en">Job title</D:description>
+  </D:principal-search-property>
+</D:principal-search-property-set>
+@
+
+<<test-http-rfc4316-4.1>>=
+PROPPATCH /bar.html HTTP/1.1
+Host: example.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propertyupdate xmlns:D="DAV:"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:set>
+    <D:prop>
+      <Z:released xsi:type="xs:boolean">false</Z:released>
+    </D:prop>
+  </D:set>
+</D:propertyupdate>
+@
+
+<<response-http-rfc4316-4.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:response>
+    <D:href>http://example.org/bar.html</D:href>
+    <D:propstat>
+      <D:prop><Z:released xsi:type="xs:boolean" /></D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4316-4.2>>=
+PROPPATCH /bar.html HTTP/1.1
+Host: example.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propertyupdate xmlns:D="DAV:"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:set>
+    <D:prop>
+      <Z:released xsi:type="xs:boolean">t</Z:released>
+    </D:prop>
+  </D:set>
+</D:propertyupdate>
+@
+
+<<response-http-rfc4316-4.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:response>
+    <D:href>http://example.org/bar.html</D:href>
+    <D:propstat>
+      <D:prop><Z:released/></D:prop>
+      <D:status>HTTP/1.1 422 Unprocessable Entity</D:status>
+      <D:responsedescription>
+        Does not parse as xs:boolean
+      </D:responsedescription>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4316-4.3>>=
+PROPPATCH /bar.html HTTP/1.1
+Host: example.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propertyupdate xmlns:D="DAV:"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:set>
+    <D:prop>
+      <Z:released xsi:type="Z:custom">t</Z:released>
+    </D:prop>
+  </D:set>
+</D:propertyupdate>
+@
+
+<<response-http-rfc4316-4.3>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:response>
+    <D:href>http://example.org/bar.html</D:href>
+    <D:propstat>
+      <D:prop><Z:released/></D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4316-5.1>>=
+PROPFIND /bar.html HTTP/1.1
+Host: example.org
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:"
+  xmlns:Z="http://ns.example.org/standards/z39.50">
+  <D:prop>
+    <D:getcontenttype/>
+    <Z:released/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4316-5.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+   xmlns:Z="http://ns.example.org/standards/z39.50"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <D:response>
+    <D:href>http://example.org/bar.html</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getcontenttype>text/html</D:getcontenttype>
+        <Z:released xsi:type="xs:boolean">1</Z:released>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4331-5>>=
+PROPFIND /~milele/public/ HTTP/1.1
+Depth: 0
+Host: www.example.com
+Content-Type: text/xml
+Content-Length: xxx
+
+<?xml version="1.0" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:quota-available-bytes/>
+    <D:quota-used-bytes/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4331-5>>=
+HTTP/1.1 207 Multi-Status
+Date: Tue, 16 Oct 2001 22:13:39 GMT
+Content-Length: xxx
+Content-Type: text/xml; charset=UTF-8
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+<D:response>
+  <D:href>http://www.example.com/~milele/public/</D:href>
+  <D:propstat>
+    <D:prop>
+      <D:quota-available-bytes>596650</D:quota-available-bytes>
+      <D:quota-used-bytes>403350</D:quota-used-bytes>
+    </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+</D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4331-6>>=
+PUT /x HTTP/1.1
+Host: www.example.com
+Content-Length: xxx
+
+xxxxxxxxx
+@
+
+<<response-http-rfc4331-6>>=
+HTTP/1.1 507 Insufficient Storage
+Content-Length: xxx
+Content-Type: text/xml
+
+<?xml version="1.0">
+<error xmlns="DAV:">
+  <quota-not-exceeded/>
+</error>
+@
+
+<<test-http-rfc4437-6.1>>=
+MKREDIRECTREF /~whitehead/dav/spec08.ref HTTP/1.1
+Host: www.example.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkredirectref xmlns:D="DAV:">
+  <D:reftarget>
+    <D:href>/i-d/draft-webdav-protocol-08.txt</D:href>
+  </D:reftarget>
+</D:mkredirectref>
+@
+
+<<response-http-rfc4331-6.1>>=
+HTTP/1.1 201 Created
+@
+
+<<test-http-rfc4331-7.1>>=
+UPDATEREDIRECTREF /~whitehead/dav/spec08.ref HTTP/1.1
+Host: www.example.com
+Apply-To-Redirect-Ref: T
+Content-Type: text/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:updateredirectref xmlns:D="DAV:">
+  <D:reftarget>
+    <D:href>/i-d/draft-webdav-protocol-08b.txt</D:href>
+  </D:reftarget>
+</D:updateredirectref>
+@
+
+<<response-http-rfc4331-7.1>>=
+HTTP/1.1 200 OK
+@
+
+<<test-http-rfc4331-8.1>>=
+PROPFIND /MyCollection/ HTTP/1.1
+Host: example.com
+Depth: infinity
+Apply-To-Redirect-Ref: F
+Content-Type: text/xml
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop xmlns:J="http://example.com/jsprops/">
+    <D:resourcetype/>
+    <J:keywords/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4331-8.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:" xmlns:J="http://example.com/jsprops/">
+  <D:response>
+    <D:href>/MyCollection/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype><D:collection/></D:resourcetype>
+        <J:keywords>diary, interests, hobbies</J:keywords>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/MyCollection/diary.html</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype/>
+        <J:keywords>diary, travel, family, history</J:keywords>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/MyCollection/nunavut</D:href>
+    <D:status>HTTP/1.1 302 Found</D:status>
+    <D:location>
+      <D:href>http://example.ca/art/inuit/</D:href>
+    </D:location>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4331-8.2>>=
+PROPFIND /MyCollection/ HTTP/1.1
+Host: example.com
+Depth: infinity
+Apply-To-Redirect-Ref: T
+Content-Type: text/xml
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:resourcetype/>
+    <D:reftarget/>
+    <D:redirect-lifetime/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4331-8.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml
+Content-Length: xxxx
+
+<?xml version="1.0" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>/MyCollection/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype><D:collection/></D:resourcetype>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop>
+        <D:reftarget/>
+        <D:redirect-lifetime/>
+      </D:prop>
+      <D:status>HTTP/1.1 404 Not Found</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/MyCollection/diary.html</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype/>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop>
+        <D:reftarget/>
+        <D:redirect-lifetime/>
+      </D:prop>
+      <D:status>HTTP/1.1 404 Not Found</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/MyCollection/nunavut</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype><D:redirectref/></D:resourcetype>
+        <D:reftarget>
+          <D:href>http://example.ca/art/inuit/</D:href>
+        </D:reftarget>
+        <D:redirect-lifetime><D:temporary/></D:redirect-lifetime>
+      </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4331-10.1>>=
+PROPFIND /geog/ HTTP/1.1
+Host: example.com
+Apply-To-Redirect-Ref: T
+Depth: 1
+Content-Type: text/xml
+Content-Length: nnn
+
+<?xml version="1.0" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop>
+    <D:resourcetype/>
+    <D:reftarget/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4331-10.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml
+Content-Length: nnn
+
+<?xml version="1/0" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>/geog/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype><D:collection/></D:resourcetype>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop><D:reftarget/></D:prop>
+      <D:status>HTTP/1.1 404 Not Found</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/geog/stats.html</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:resourcetype><D:redirectref/></D:resourcetype>
+        <D:reftarget>
+          <D:href>statistics/population/1997.html</D:href>
+        </D:reftarget>
+      </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4331-16.1>>=
+OPTIONS /somecollection/someresource HTTP/1.1
+Host: example.org
+@
+
+<<response-http-rfc4331-16.1>>=
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, COPY, MOVE
+Allow: MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, MKREDIRECTREF
+DAV: 1, 2, redirectrefs
+@
+
+<<test-http-rfc4709-4a>>=
+GET /user42/inbox/ HTTP/1.1
+Host: www.example.com
+@
+
+<<response-http-rfc4709-4a>>=
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: xxx
+
+..
+<a href="?action=davmount">View this collection in your
+WebDAV client</a>
+..
+@
+
+<<test-http-rfc4709-4b>>=
+GET /user42/inbox/?action=davmount HTTP/1.1
+Host: www.example.com
+@
+
+<<response-http-rfc4709-4b>>=
+HTTP/1.1 200 OK
+Content-Type: application/davmount+xml
+Content-Length: xxx
+Cache-Control: private
+
+<dm:mount xmlns:dm="http://purl.org/NET/webdav/mount">
+  <dm:url>http://www.example.com/user42/</dm:url>
+  <dm:open>inbox/</dm:open>
+</dm:mount>
+@
+
+<<test-http-rfc4918-7.5.1>>=
+COPY /locked/member/index.html HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/users/f/fielding/index.html
+If: <http://www.example.com/users/f/fielding/index.html>
+    (<urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6>)
+If: (<urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf>)
+If: <http://www.example.com/locked/>
+      (<urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf>)
+If: <http://www.example.com/locked/member>
+      (<urn:uuid:150852e2-3847-42d5-8cbe-0f4f296f26cf>)
+@
+
+<<response-http-rfc4918-7.5.1>>=
+HTTP/1.1 204 No Content
+@
+
+<<test-http-rfc4918-7.5.2>>=
+DELETE /locked/member HTTP/1.1
+Host: example.com
+@
+
+<<response-http-rfc4918-7.5.2>>=
+HTTP/1.1 423 Locked
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+  <D:lock-token-submitted>
+    <D:href>/locked/</D:href>
+  </D:lock-token-submitted>
+</D:error>
+@
+
+<<test-http-rfc4918-9.1.3>>=
+PROPFIND /file HTTP/1.1
+Host: www.example.com
+Content-type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop xmlns:R="http://ns.example.com/boxschema/">
+    <R:bigbox/>
+    <R:author/>
+    <R:DingALing/>
+    <R:Random/>
+  </D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4918-9.1.3>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response xmlns:R="http://ns.example.com/boxschema/">
+    <D:href>http://www.example.com/file</D:href>
+    <D:propstat>
+      <D:prop>
+        <R:bigbox>
+          <R:BoxType>Box type A</R:BoxType>
+        </R:bigbox>
+        <R:author>
+          <R:Name>J.J. Johnson</R:Name>
+        </R:author>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop><R:DingALing/><R:Random/></D:prop>
+      <D:status>HTTP/1.1 403 Forbidden</D:status>
+      <D:responsedescription> The user does not have access to the
+ DingALing property.
+      </D:responsedescription>
+    </D:propstat>
+  </D:response>
+  <D:responsedescription> There has been an access violation error.
+  </D:responsedescription>
+</D:multistatus>
+@
+
+<<test-http-rfc4918-9.1.4>>=
+PROPFIND /container/ HTTP/1.1
+Host: www.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<propfind xmlns="DAV:">
+  <propname/>
+</propfind>
+@
+
+<<response-http-rfc4918-9.1.4>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<multistatus xmlns="DAV:">
+  <response>
+    <href>http://www.example.com/container/</href>
+    <propstat>
+      <prop xmlns:R="http://ns.example.com/boxschema/">
+        <R:bigbox/>
+        <R:author/>
+        <creationdate/>
+        <displayname/>
+        <resourcetype/>
+        <supportedlock/>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+  <response>
+    <href>http://www.example.com/container/front.html</href>
+    <propstat>
+      <prop xmlns:R="http://ns.example.com/boxschema/">
+        <R:bigbox/>
+        <creationdate/>
+        <displayname/>
+        <getcontentlength/>
+        <getcontenttype/>
+        <getetag/>
+        <getlastmodified/>
+        <resourcetype/>
+        <supportedlock/>
+      </prop>
+      <status>HTTP/1.1 200 OK</status>
+    </propstat>
+  </response>
+</multistatus>
+@
+
+<<test-http-rfc4918-9.1.5>>=
+PROPFIND /container/ HTTP/1.1
+Host: www.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:allprop/>
+</D:propfind>
+@
+
+<<response-http-rfc4918-9.1.5>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>/container/</D:href>
+    <D:propstat>
+      <D:prop xmlns:R="http://ns.example.com/boxschema/">
+        <R:bigbox><R:BoxType>Box type A</R:BoxType></R:bigbox>
+        <R:author><R:Name>Hadrian</R:Name></R:author>
+        <D:creationdate>1997-12-01T17:42:21-08:00</D:creationdate>
+        <D:displayname>Example collection</D:displayname>
+        <D:resourcetype><D:collection/></D:resourcetype>
+        <D:supportedlock>
+          <D:lockentry>
+            <D:lockscope><D:exclusive/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+          <D:lockentry>
+            <D:lockscope><D:shared/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+        </D:supportedlock>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/container/front.html</D:href>
+    <D:propstat>
+      <D:prop xmlns:R="http://ns.example.com/boxschema/">
+        <R:bigbox><R:BoxType>Box type B</R:BoxType>
+        </R:bigbox>
+        <D:creationdate>1997-12-01T18:27:21-08:00</D:creationdate>
+        <D:displayname>Example HTML resource</D:displayname>
+        <D:getcontentlength>4525</D:getcontentlength>
+        <D:getcontenttype>text/html</D:getcontenttype>
+        <D:getetag>"zzyzx"</D:getetag>
+        <D:getlastmodified
+          >Mon, 12 Jan 1998 09:25:56 GMT</D:getlastmodified>
+        <D:resourcetype/>
+        <D:supportedlock>
+          <D:lockentry>
+            <D:lockscope><D:exclusive/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+          <D:lockentry>
+            <D:lockscope><D:shared/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+        </D:supportedlock>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4918-9.1.6>>=
+PROPFIND /mycol/ HTTP/1.1
+Host: www.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:allprop/>
+  <D:include>
+    <D:supported-live-property-set/>
+    <D:supported-report-set/>
+  </D:include>
+</D:propfind>
+@
+
+<<response-http-rfc4918-9.1.6>>=
+@
+
+<<test-http-rfc4918-9.2.2>>=
+PROPPATCH /bar.html HTTP/1.1
+Host: www.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propertyupdate xmlns:D="DAV:"
+        xmlns:Z="http://ns.example.com/standards/z39.50/">
+  <D:set>
+    <D:prop>
+      <Z:Authors>
+        <Z:Author>Jim Whitehead</Z:Author>
+        <Z:Author>Roy Fielding</Z:Author>
+      </Z:Authors>
+    </D:prop>
+  </D:set>
+  <D:remove>
+    <D:prop><Z:Copyright-Owner/></D:prop>
+  </D:remove>
+</D:propertyupdate>
+@
+
+<<response-http-rfc4918-9.2.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+        xmlns:Z="http://ns.example.com/standards/z39.50/">
+  <D:response>
+    <D:href>http://www.example.com/bar.html</D:href>
+    <D:propstat>
+      <D:prop><Z:Authors/></D:prop>
+      <D:status>HTTP/1.1 424 Failed Dependency</D:status>
+    </D:propstat>
+    <D:propstat>
+      <D:prop><Z:Copyright-Owner/></D:prop>
+      <D:status>HTTP/1.1 409 Conflict</D:status>
+    </D:propstat>
+    <D:responsedescription> Copyright Owner cannot be deleted or
+      altered.</D:responsedescription>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4918-9.3.2>>=
+MKCOL /webdisc/xfiles/ HTTP/1.1
+Host: www.example.com
+@
+
+<<response-http-rfc4918-9.3.2>>=
+HTTP/1.1 201 Created
+@
+
+<<test-http-rfc4918-9.6.2>>=
+DELETE  /container/ HTTP/1.1
+Host: www.example.com
+@
+
+<<response-http-rfc4918-9.6.2>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>http://www.example.com/container/resource3</d:href>
+    <d:status>HTTP/1.1 423 Locked</d:status>
+    <d:error><d:lock-token-submitted/></d:error>
+  </d:response>
+</d:multistatus>
+@
+
+<<test-http-rfc4918-9.8.6>>=
+COPY /~fielding/index.html HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/users/f/fielding/index.html
+@
+
+<<response-http-rfc4918-9.8.6>>=
+HTTP/1.1 204 No Content
+@
+
+<<test-http-rfc4918-9.8.7>>=
+COPY /~fielding/index.html HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/users/f/fielding/index.html
+Overwrite: F
+@
+
+<<response-http-rfc4918-9.8.7>>=
+HTTP/1.1 412 Precondition Failed
+@
+
+<<test-http-rfc4918-9.8.8>>=
+COPY /container/ HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/othercontainer/
+Depth: infinity
+@
+
+<<response-http-rfc4918-9.8.8>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+
+<d:multistatus xmlns:d="DAV:">
+  <d:response>
+    <d:href>http://www.example.com/othercontainer/R2/</d:href>
+    <d:status>HTTP/1.1 423 Locked</d:status>
+    <d:error><d:lock-token-submitted/></d:error>
+  </d:response>
+</d:multistatus>
+@
+
+<<test-http-rfc4918-9.9.5>>=
+MOVE /~fielding/index.html HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/users/f/fielding/index.html
+@
+
+<<response-http-rfc4918-9.9.5>>=
+HTTP/1.1 201 Created
+Location: http://www.example.com/users/f/fielding/index.html
+@
+
+<<test-http-rfc4918-9.9.6>>=
+MOVE /container/ HTTP/1.1
+Host: www.example.com
+Destination: http://www.example.com/othercontainer/
+Overwrite: F
+If: (<urn:uuid:fe184f2e-6eec-41d0-c765-01adc56e6bb4>)
+   (<urn:uuid:e454f3f3-acdc-452a-56c7-00a5c91e4b77>)
+@
+
+<<response-http-rfc4918-9.9.6>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<d:multistatus xmlns:d='DAV:'>
+  <d:response>
+    <d:href>http://www.example.com/othercontainer/C2/</d:href>
+    <d:status>HTTP/1.1 423 Locked</d:status>
+    <d:error><d:lock-token-submitted/></d:error>
+  </d:response>
+</d:multistatus>
+@
+
+<<test-http-rfc4918-9.10.7>>=
+LOCK /workspace/webdav/proposal.doc HTTP/1.1
+Host: example.com
+Timeout: Infinite, Second-4100000000
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="ejw",
+  realm="ejw@example.com", nonce="...",
+  uri="/workspace/webdav/proposal.doc",
+  response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:lockinfo xmlns:D='DAV:'>
+  <D:lockscope><D:exclusive/></D:lockscope>
+  <D:locktype><D:write/></D:locktype>
+  <D:owner>
+    <D:href>http://example.org/~ejw/contact.html</D:href>
+  </D:owner>
+</D:lockinfo>
+@
+
+<<response-http-rfc4918-9.10.7>>=
+HTTP/1.1 200 OK
+Lock-Token: <urn:uuid:e71d4fae-5dec-22d6-fea5-00a0c91e6be4>
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:prop xmlns:D="DAV:">
+  <D:lockdiscovery>
+    <D:activelock>
+      <D:locktype><D:write/></D:locktype>
+      <D:lockscope><D:exclusive/></D:lockscope>
+      <D:depth>infinity</D:depth>
+      <D:owner>
+        <D:href>http://example.org/~ejw/contact.html</D:href>
+      </D:owner>
+      <D:timeout>Second-604800</D:timeout>
+      <D:locktoken>
+        <D:href
+        >urn:uuid:e71d4fae-5dec-22d6-fea5-00a0c91e6be4</D:href>
+      </D:locktoken>
+      <D:lockroot>
+        <D:href
+        >http://example.com/workspace/webdav/proposal.doc</D:href>
+      </D:lockroot>
+    </D:activelock>
+  </D:lockdiscovery>
+</D:prop>
+@
+
+<<test-http-rfc4918-9.10.8>>=
+LOCK /workspace/webdav/proposal.doc HTTP/1.1
+Host: example.com
+Timeout: Infinite, Second-4100000000
+If: (<urn:uuid:e71d4fae-5dec-22d6-fea5-00a0c91e6be4>)
+Authorization: Digest username="ejw",
+  realm="ejw@example.com", nonce="...",
+  uri="/workspace/webdav/proposal.doc",
+  response="...", opaque="..."
+@
+
+<<response-http-rfc4918-9.10.8>>=
+HTTP/1.1 200 OK
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:prop xmlns:D="DAV:">
+  <D:lockdiscovery>
+    <D:activelock>
+      <D:locktype><D:write/></D:locktype>
+      <D:lockscope><D:exclusive/></D:lockscope>
+      <D:depth>infinity</D:depth>
+      <D:owner>
+        <D:href>http://example.org/~ejw/contact.html</D:href>
+      </D:owner>
+      <D:timeout>Second-604800</D:timeout>
+      <D:locktoken>
+        <D:href
+        >urn:uuid:e71d4fae-5dec-22d6-fea5-00a0c91e6be4</D:href>
+      </D:locktoken>
+      <D:lockroot>
+        <D:href
+        >http://example.com/workspace/webdav/proposal.doc</D:href>
+      </D:lockroot>
+    </D:activelock>
+  </D:lockdiscovery>
+</D:prop>
+@
+
+<<test-http-rfc4918-9.10.9>>=
+LOCK /webdav/ HTTP/1.1
+Host: example.com
+Timeout: Infinite, Second-4100000000
+Depth: infinity
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+Authorization: Digest username="ejw",
+  realm="ejw@example.com", nonce="...",
+  uri="/workspace/webdav/proposal.doc",
+  response="...", opaque="..."
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:lockinfo xmlns:D="DAV:">
+  <D:locktype><D:write/></D:locktype>
+  <D:lockscope><D:exclusive/></D:lockscope>
+  <D:owner>
+    <D:href>http://example.org/~ejw/contact.html</D:href>
+  </D:owner>
+</D:lockinfo>
+@
+
+<<response-http-rfc4918-9.10.9>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://example.com/webdav/secret</D:href>
+    <D:status>HTTP/1.1 403 Forbidden</D:status>
+  </D:response>
+  <D:response>
+    <D:href>http://example.com/webdav/</D:href>
+    <D:status>HTTP/1.1 424 Failed Dependency</D:status>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4918-9.11.2>>=
+UNLOCK /workspace/webdav/info.doc HTTP/1.1
+Host: example.com
+Lock-Token: <urn:uuid:a515cfa4-5da4-22e1-f5b5-00a0451e6bf7>
+Authorization: Digest username="ejw"
+  realm="ejw@example.com", nonce="...",
+  uri="/workspace/webdav/proposal.doc",
+  response="...", opaque="..."
+@
+
+<<response-http-rfc4918-9.11.2>>=
+HTTP/1.1 204 No Content
+@
+
+<<test-http-rfc4918-10.4.9>>=
+COPY /resource1 HTTP/1.1
+Host: www.example.com
+Destination: /resource2
+If: </resource1>
+  (<urn:uuid:181d4fae-7d8c-11d0-a765-00a0c91e6bf2>
+  [W/"A weak ETag"]) (["strong ETag"])
+@
+
+<<response-http-rfc4918-10.4.9>>=
+HTTP/1.1 423 Locked
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error xmlns:D="DAV:">
+  <D:lock-token-submitted>
+    <D:href>/workspace/webdav/</D:href>
+  </D:lock-token-submitted>
+</D:error>
+@
+
+<<test-http-rfc4918-10.4.10>>=
+DELETE /specs/rfc2518.txt HTTP/1.1
+Host: www.example.com
+If: <http://www.example.com/specs/>
+  (<urn:uuid:181d4fae-7d8c-11d0-a765-00a0c91e6bf2>)
+@
+
+<<response-http-rfc4918-10.4.10>>=
+@
+
+<<test-http-rfc4918-15.8.1>>=
+PROPFIND /container/ HTTP/1.1
+Host: www.example.com
+Content-Length: xxxx
+Content-Type: application/xml; charset="utf-8"
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D='DAV:'>
+  <D:prop><D:lockdiscovery/></D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4918-15.8.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D='DAV:'>
+  <D:response>
+    <D:href>http://www.example.com/container/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:lockdiscovery>
+         <D:activelock>
+          <D:locktype><D:write/></D:locktype>
+          <D:lockscope><D:exclusive/></D:lockscope>
+          <D:depth>0</D:depth>
+          <D:owner>Jane Smith</D:owner>
+          <D:timeout>Infinite</D:timeout>
+          <D:locktoken>
+            <D:href
+        >urn:uuid:f81de2ad-7f3d-a1b2-4f3c-00a0c91a9d76</D:href>
+          </D:locktoken>
+          <D:lockroot>
+            <D:href>http://www.example.com/container/</D:href>
+          </D:lockroot>
+         </D:activelock>
+        </D:lockdiscovery>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4918-15.10.1>>=
+PROPFIND /container/ HTTP/1.1
+Host: www.example.com
+Content-Length: xxxx
+Content-Type: application/xml; charset="utf-8"
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:propfind xmlns:D="DAV:">
+  <D:prop><D:supportedlock/></D:prop>
+</D:propfind>
+@
+
+<<response-http-rfc4918-15.10.1>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.com/container/</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:supportedlock>
+          <D:lockentry>
+            <D:lockscope><D:exclusive/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+          <D:lockentry>
+            <D:lockscope><D:shared/></D:lockscope>
+            <D:locktype><D:write/></D:locktype>
+          </D:lockentry>
+        </D:supportedlock>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc5323-2.3.3>>=
+SEARCH / HTTP/1.1
+Host: example.org
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 252
+
+<?xml version="1.0" encoding="UTF-8"?>
+<D:searchrequest xmlns:D="DAV:" xmlns:F="http://example.com/foo">
+  <F:natural-language-query>
+    Find the locations of good Thai restaurants in Los Angeles
+  </F:natural-language-query>
+</D:searchrequest>
+@
+
+<<response-http-rfc5323-2.3.3>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 429
+
+<?xml version="1.0" encoding="UTF-8"?>
+<D:multistatus xmlns:D="DAV:"
+   xmlns:R="http://example.org/propschema">
+  <D:response>
+    <D:href>http://siamiam.example/</D:href>
+    <D:propstat>
+      <D:prop>
+        <R:location>259 W. Hollywood</R:location>
+        <R:rating><R:stars>4</R:stars></R:rating>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc5323-2.3.4>>=
+SEARCH / HTTP/1.1
+Host: example.org
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 252
+
+<?xml version="1.0" encoding="UTF-8"?>
+<D:searchrequest xmlns:D="DAV:" xmlns:F="http://example.com/foo">
+  <F:natural-language-query>
+    Find the locations of good Thai restaurants in Los Angeles
+  </F:natural-language-query>
+</D:searchrequest>
+@
+
+<<response-http-rfc5323-2.3.4>>=
+HTTP/1.1 207 Multistatus
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 640
+
+<?xml version="1.0" encoding="utf-8"?>
+<D:multistatus xmlns:D="DAV:">
+  <D:response>
+    <D:href>http://www.example.net/sounds/unbrokenchain.au</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+  <D:response>
+    <D:href>http://tech.mit.example/arch96/photos/Lesh1.jpg</D:href>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:response>
+  <D:response>
+    <D:href>http://example.net</D:href>
+    <D:status>HTTP/1.1 507 Insufficient Storage</D:status>
+    <D:responsedescription xml:lang="en">
+       Only first two matching records were returned
+    </D:responsedescription>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc5323-2.4.1>>=
+SEARCH / HTTP/1.1
+Host: example.org
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 252
+
+<?xml version="1.0" encoding="UTF-8"?>
+<D:searchrequest xmlns:D="DAV:" xmlns:F="http://example.com/foo">
+  <F:natural-language-query>
+    Find the locations of good Thai restaurants in Los Angeles
+  </F:natural-language-query>
+</D:searchrequest>
+@
+
+<<response-http-rfc5323-2.4.1>>=
+HTTP/1.1 409 Conflict
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 275
+
+<?xml version="1.0" encoding="UTF-8"?>
+<d:error xmlns:d="DAV:">
+  <d:search-scope-valid>
+    <d:response>
+      <d:href>http://www.example.com/X</d:href>
+      <d:status>HTTP/1.1 404 Object Not Found</d:status>
+    </d:response>
+  </d:search-scope-valid>
+</d:error>
+@
+
+<<test-http-rfc5323-3.4a>>=
+OPTIONS /somefolder HTTP/1.1
+Host: example.org
+@
+
+<<response-http-rfc5323-3.4a>>=
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, COPY, MOVE
+Allow: MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, SEARCH
+DASL: <DAV:basicsearch>
+DASL: <http://foobar.example/syntax1>, <http://akuma.example/syntax2>
+@
+
+<<test-http-rfc5323-3.4b>>=
+PROPFIND /somefolder HTTP/1.1
+Host: example.org
+Depth: 0
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 165
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<propfind xmlns="DAV:">
+  <prop>
+    <supported-query-grammar-set/>
+    <supported-method-set/>
+  </prop>
+</propfind>
+@
+
+<<response-http-rfc5323-3.4b>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: text/xml; charset="utf-8"
+Content-Length: 1349
+
+<?xml version="1.0" encoding="utf-8" ?>
+<multistatus xmlns="DAV:">
+ <response>
+  <href>http://example.org/somefolder</href>
+  <propstat>
+   <prop>
+    <supported-query-grammar-set>
+     <supported-query-grammar>
+      <grammar><basicsearch/></grammar>
+     </supported-query-grammar>
+     <supported-query-grammar>
+      <grammar><syntax1 xmlns="http://foobar.example/"/></grammar>
+     </supported-query-grammar>
+     <supported-query-grammar>
+      <grammar><syntax2 xmlns="http://akuma.example/"/></grammar>
+     </supported-query-grammar>
+    </supported-query-grammar-set>
+    <supported-method-set>
+     <supported-method name="COPY" />
+     <supported-method name="DELETE" />
+     <supported-method name="GET" />
+     <supported-method name="HEAD" />
+     <supported-method name="LOCK" />
+     <supported-method name="MKCOL" />
+     <supported-method name="MOVE" />
+     <supported-method name="OPTIONS" />
+     <supported-method name="POST" />
+     <supported-method name="PROPFIND" />
+     <supported-method name="PROPPATCH" />
+     <supported-method name="PUT" />
+     <supported-method name="SEARCH" />
+     <supported-method name="TRACE" />
+     <supported-method name="UNLOCK" />
+    </supported-method-set>
+   </prop>
+   <status>HTTP/1.1 200 OK</status>
+  </propstat>
+ </response>
+</multistatus>
+@
+
+<<test-http-rfc5323-4.1.1>>=
+SEARCH / HTTP/1.1
+Host: recipes.example
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 258
+
+<?xml version="1.0"?>
+<query-schema-discovery xmlns="DAV:">
+  <basicsearch>
+    <from>
+      <scope>
+        <href>http://recipes.example</href>
+        <depth>infinity</depth>
+      </scope>
+    </from>
+  </basicsearch>
+</query-schema-discovery>
+@
+
+<<response-http-rfc5323-4.1.1>>=
+HTTP/1.1 207 Multistatus
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxx
+
+<?xml version="1.0"?>
+<multistatus xmlns="DAV:">
+  <response>
+    <href>http://recipes.example</href>
+    <status>HTTP/1.1 200 OK</status>
+    <query-schema>
+      <basicsearchschema>
+        <!-- (See Section 5.19 for
+        the actual contents) -->
+      </basicsearchschema>
+    </query-schema>
+  </response>
+</multistatus>
+@
+
+<<test-http-rfc5323-5.2.1>>=
+SEARCH / HTTP/1.1
+Host: recipes.example
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 258
+
+<d:searchrequest xmlns:d="DAV:">
+  <d:basicsearch>
+    <d:select>
+      <d:prop><d:getcontentlength/></d:prop>
+    </d:select>
+    <d:from>
+      <d:scope>
+        <d:href>/container1/</d:href>
+        <d:depth>infinity</d:depth>
+      </d:scope>
+    </d:from>
+    <d:where>
+      <d:gt>
+        <d:prop><d:getcontentlength/></d:prop>
+        <d:literal>10000</d:literal>
+      </d:gt>
+    </d:where>
+    <d:orderby>
+      <d:order>
+        <d:prop><d:getcontentlength/></d:prop>
+        <d:ascending/>
+      </d:order>
+    </d:orderby>
+  </d:basicsearch>
+</d:searchrequest>
+@
+
+<<response-http-rfc5323-5.2.1>>=
+@
+
+<<test-http-rfc5323-5.19.9>>=
+SEARCH / HTTP/1.1
+Host: recipes.example
+Content-Type: application/xml; charset="utf-8"
+Content-Length: 258
+
+<d:query-schema-discovery xmlns:d="DAV:">
+  <d:basicsearch>
+    <d:from>
+      <d:scope>
+        <d:href>/container1/</d:href>
+        <d:depth>infinity</d:depth>
+      </d:scope>
+    </d:from>
+  </d:basicsearch>
+</d:query-schema-discovery>
+@
+
+<<response-http-rfc5323-5.19.9>>=
+<D:basicsearchschema xmlns:D="DAV:"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <D:properties>
+    <D:propdesc>
+      <D:prop><D:getcontentlength/></D:prop>
+      <D:datatype><xs:nonNegativeInteger/></D:datatype>
+      <D:searchable/><D:selectable/><D:sortable/>
+    </D:propdesc>
+    <D:propdesc>
+      <D:prop><D:getcontenttype/><D:displayname/></D:prop>
+      <D:searchable/><D:selectable/><D:sortable/>
+    </D:propdesc>
+    <D:propdesc>
+      <D:prop><fstop xmlns="http://ns.example.org"/></D:prop>
+      <D:selectable/>
+    </D:propdesc>
+    <D:propdesc>
+      <D:any-other-property/>
+      <D:searchable/><D:selectable/>
+    </D:propdesc>
+  </D:properties>
+  <D:operators>
+    <D:opdesc>
+      <D:like/><D:operand-property/><D:operand-literal/>
+    </D:opdesc>
+    <D:opdesc allow-pcdata="yes">
+      <D:contains/>
+    </D:opdesc>
+  </D:operators>
+</D:basicsearchschema>
+@
+
+<<test-http-rfc5689-3.1.1>>=
+OPTIONS /addressbooks/users/ HTTP/1.1
+Host: addressbook.example.com
+@
+
+<<response-http-rfc5689->>=
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, COPY, MOVE
+Allow: MKCOL, PROPFIND, PROPPATCH, LOCK, UNLOCK, REPORT, ACL
+DAV: 1, 2, 3, access-control, extended-mkcol
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Length: 0
+@
+
+<<test-http-rfc5689-3.4>>=
+MKCOL /home/special/ HTTP/1.1
+Host: special.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkcol xmlns:D="DAV:"
+              xmlns:E="http://example.com/ns/">
+  <D:set>
+    <D:prop>
+      <D:resourcetype>
+        <D:collection/>
+        <E:special-resource/>
+      </D:resourcetype>
+      <D:displayname>Special Resource</D:displayname>
+    </D:prop>
+  </D:set>
+</D:mkcol>
+@
+
+<<response-http-rfc5689-3.4>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+@
+
+<<test-http-rfc5689-3.5>>=
+MKCOL /home/special/ HTTP/1.1
+Host: special.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkcol xmlns:D="DAV:"
+              xmlns:E="http://example.com/ns/">
+  <D:set>
+    <D:prop>
+      <D:resourcetype>
+        <D:collection/>
+        <E:special-resource/>
+      </D:resourcetype>
+      <D:displayname>Special Resource</D:displayname>
+    </D:prop>
+  </D:set>
+</D:mkcol>
+@
+
+<<response-http-rfc5689->>=
+HTTP/1.1 403 Forbidden
+Cache-Control: no-cache
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkcol-response xmlns:D="DAV:">
+  <D:propstat>
+    <D:prop>
+      <D:resourcetype/>
+    </D:prop>
+    <D:status>HTTP/1.1 403 Forbidden</D:status>
+    <D:error><D:valid-resourcetype /></D:error>
+    <D:responsedescription>Resource type is not
+    supported by this server</D:responsedescription>
+  </D:propstat>
+  <D:propstat>
+    <D:prop>
+      <D:displayname/>
+    </D:prop>
+    <D:status>HTTP/1.1 424 Failed Dependency</D:status>
+  </D:propstat>
+</D:mkcol-response>
+@
+
+<<test-http-rfc5689-4.1.1a>>=
+MKCALENDAR /home/lisa/calendars/events/ HTTP/1.1
+Host: calendar.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:mkcalendar xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:set>
+    <D:prop>
+      <D:displayname>Lisa's Events</D:displayname>
+    </D:prop>
+  </D:set>
+</C:mkcalendar>
+@
+
+<<response-http-rfc5689-4.1.1a>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:mkcalendar-response xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:propstat>
+    <D:prop>
+      <D:displayname/>
+    </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+</C:mkcalendar-response>
+@
+
+<<test-http-rfc5689-4.1.1b>>=
+MKCOL /home/lisa/calendars/events/ HTTP/1.1
+Host: calendar.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkcol xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:set>
+    <D:prop>
+      <D:resourcetype>
+        <D:collection/>
+        <C:calendar/>
+      </D:resourcetype>
+      <D:displayname>Lisa's Events</D:displayname>
+    </D:prop>
+  </D:set>
+</D:mkcol>
+@
+
+<<response-http-rfc5689-4.1.1b>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:mkcol-response xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:propstat>
+    <D:prop>
+      <D:resourcetype/>
+      <D:displayname/>
+    </D:prop>
+    <D:status>HTTP/1.1 200 OK</D:status>
+  </D:propstat>
+</D:mkcol-response>
+@
+
+<<test-http-rfc4791-5.1.1>>=
+OPTIONS /home/bernard/calendars/ HTTP/1.1
+Host: cal.example.com
+@
+
+<<response-http-rfc4791-5.1.1>>=
+HTTP/1.1 200 OK
+Allow: OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, COPY, MOVE
+Allow: PROPFIND, PROPPATCH, LOCK, UNLOCK, REPORT, ACL
+DAV: 1, 2, access-control, calendar-access
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Length: 0
+@
+
+<<test-http-rfc4791-5.3.1.2>>=
+MKCALENDAR /home/lisa/calendars/events/ HTTP/1.1
+Host: cal.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:mkcalendar xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:set>
+    <D:prop>
+      <D:displayname>Lisa's Events</D:displayname>
+      <C:calendar-description xml:lang="en"
+>Calendar restricted to events.</C:calendar-description>
+      <C:supported-calendar-component-set>
+        <C:comp name="VEVENT"/>
+      </C:supported-calendar-component-set>
+      <C:calendar-timezone><![CDATA[BEGIN:VCALENDAR
+PRODID:-//Example Corp.//CalDAV Client//EN
+VERSION:2.0
+BEGIN:VTIMEZONE
+TZID:US-Eastern
+LAST-MODIFIED:19870101T000000Z
+BEGIN:STANDARD
+DTSTART:19671029T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+TZNAME:Eastern Standard Time (US & Canada)
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:19870405T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+TZNAME:Eastern Daylight Time (US & Canada)
+END:DAYLIGHT
+END:VTIMEZONE
+END:VCALENDAR
+]]></C:calendar-timezone>
+    </D:prop>
+  </D:set>
+</C:mkcalendar>
+@
+
+<<response-http-rfc4791-5.3.1.2>>=
+HTTP/1.1 201 Created
+Cache-Control: no-cache
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Length: 0
+@
+
+<<test-http-rfc4791-5.3.2>>=
+PUT /home/lisa/calendars/events/qwue23489.ics HTTP/1.1
+If-None-Match: *
+Host: cal.example.com
+Content-Type: text/calendar
+Content-Length: xxxx
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VEVENT
+UID:20010712T182145Z-123401@example.com
+DTSTAMP:20060712T182145Z
+DTSTART:20060714T170000Z
+DTEND:20060715T040000Z
+SUMMARY:Bastille Day Party
+END:VEVENT
+END:VCALENDAR
+@
+
+<<response-http-rfc4791-5.3.2>>=
+HTTP/1.1 201 Created
+Content-Length: 0
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+ETag: "123456789-000-111"
+@
+
+<<test-http-rfc4791-7.8.1>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <D:getetag/>
+    <C:calendar-data>
+      <C:comp name="VCALENDAR">
+        <C:prop name="VERSION"/>
+        <C:comp name="VEVENT">
+          <C:prop name="SUMMARY"/>
+          <C:prop name="UID"/>
+          <C:prop name="DTSTART"/>
+          <C:prop name="DTEND"/>
+          <C:prop name="DURATION"/>
+          <C:prop name="RRULE"/>
+          <C:prop name="RDATE"/>
+          <C:prop name="EXRULE"/>
+          <C:prop name="EXDATE"/>
+          <C:prop name="RECURRENCE-ID"/>
+        </C:comp>
+        <C:comp name="VTIMEZONE"/>
+      </C:comp>
+    </C:calendar-data>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="20060104T000000Z"
+                      end="20060105T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.1>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+           xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd2.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd2"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=US/Eastern:20060102T120000
+DURATION:PT1H
+RRULE:FREQ=DAILY;COUNT=5
+SUMMARY:Event #2
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=US/Eastern:20060104T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060104T120000
+SUMMARY:Event #2 bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=US/Eastern:20060106T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060106T120000
+SUMMARY:Event #2 bis bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.2>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+                  xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <C:calendar-data>
+      <C:limit-recurrence-set start="20060103T000000Z"
+                              end="20060105T000000Z"/>
+    </C:calendar-data>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="20060103T000000Z"
+                      end="20060105T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.2>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+           xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd2.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd2"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060102T120000
+DURATION:PT1H
+RRULE:FREQ=DAILY;COUNT=5
+SUMMARY:Event #2
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060104T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060104T120000
+SUMMARY:Event #2 bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+X-ABC-GUID:E1CX5Dr-0007ym-Hz@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.3>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+                  xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <C:calendar-data>
+      <C:expand start="20060103T000000Z"
+                end="20060105T000000Z"/>
+    </C:calendar-data>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="20060103T000000Z"
+                      end="20060105T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.3>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+           xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd2.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd2"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART:20060103T170000
+DURATION:PT1H
+RECURRENCE-ID:20060103T170000
+SUMMARY:Event #2
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART:20060104T190000
+DURATION:PT1H
+RECURRENCE-ID:20060104T170000
+SUMMARY:Event #2 bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART:20060104T150000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+X-ABC-GUID:E1CX5Dr-0007ym-Hz@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.4>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <C:calendar-data>
+      <C:limit-freebusy-set start="20060102T000000Z"
+                              end="20060103T000000Z"/>
+    </C:calendar-data>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VFREEBUSY">
+        <C:time-range start="20060102T000000Z"
+                        end="20060103T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.4>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd8.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd8"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VFREEBUSY
+ORGANIZER;CN="Bernard Desruisseaux":mailto:bernard@example.com
+UID:76ef34-54a3d2@example.com
+DTSTAMP:20050530T123421Z
+DTSTART:20060101T100000Z
+DTEND:20060108T100000Z
+FREEBUSY;FBTYPE=BUSY-TENTATIVE:20060102T100000Z/20060102T120000Z
+END:VFREEBUSY
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.5>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VTODO">
+        <C:comp-filter name="VALARM">
+          <C:time-range start="20060106T100000Z"
+                          end="20060107T100000Z"/>
+        </C:comp-filter>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.5>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd4.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd4"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235300Z
+DUE;TZID=US/Eastern:20060106T120000
+LAST-MODIFIED:20060205T235308Z
+SEQUENCE:1
+STATUS:NEEDS-ACTION
+SUMMARY:Task #2
+UID:E10BA47467C5C69BB74E8720@example.com
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER;RELATED=START:-PT10M
+END:VALARM
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.6>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:prop-filter name="UID">
+          <C:text-match collation="i;octet"
+          >DC6C50A017428C5216A2F1CD@example.com</C:text-match>
+        </C:prop-filter>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.6>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+X-ABC-GUID:E1CX5Dr-0007ym-Hz@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.7>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:prop-filter name="ATTENDEE">
+          <C:text-match collation="i;ascii-casemap"
+           >mailto:lisa@example.com</C:text-match>
+          <C:param-filter name="PARTSTAT">
+            <C:text-match collation="i;ascii-casemap"
+             >NEEDS-ACTION</C:text-match>
+          </C:param-filter>
+        </C:prop-filter>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.7>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+X-ABC-GUID:E1CX5Dr-0007ym-Hz@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.8>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT"/>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.8>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd1.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd1"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001102Z
+DTSTART;TZID=US/Eastern:20060102T100000
+DURATION:PT1H
+SUMMARY:Event #1
+Description:Go Steelers!
+UID:74855313FA803DA593CD579A@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd2.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd2"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060102T120000
+DURATION:PT1H
+RRULE:FREQ=DAILY;COUNT=5
+SUMMARY:Event #2
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060104T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060104T120000
+SUMMARY:Event #2 bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060106T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060106T120000
+SUMMARY:Event #2 bis bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+X-ABC-GUID:E1CX5Dr-0007ym-Hz@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.9>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VTODO">
+        <C:prop-filter name="COMPLETED">
+          <C:is-not-defined/>
+        </C:prop-filter>
+        <C:prop-filter name="STATUS">
+          <C:text-match
+             negate-condition="yes">CANCELLED</C:text-match>
+        </C:prop-filter>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.9>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd4.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd4"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235335Z
+DUE;VALUE=DATE:20060104
+STATUS:NEEDS-ACTION
+SUMMARY:Task #1
+UID:DDDEEB7915FA61233B861457@example.com
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER;RELATED=START:-PT10M
+END:VALARM
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd5.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd5"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235300Z
+DUE;VALUE=DATE:20060106
+LAST-MODIFIED:20060205T235308Z
+SEQUENCE:1
+STATUS:NEEDS-ACTION
+SUMMARY:Task #2
+UID:E10BA47467C5C69BB74E8720@example.com
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER;RELATED=START:-PT10M
+END:VALARM
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.8.10>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop xmlns:D="DAV:">
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:prop-filter name="X-ABC-GUID">
+          <C:text-match>ABC</C:text-match>
+        </C:prop-filter>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-7.8.10>>=
+HTTP/1.1 403 Forbidden
+Date: Sat, 11 Nov 2005 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:error>
+  <C:supported-filter>
+    <C:prop-filter name="X-ABC-GUID"/>
+  </C:supported-filter>
+</D:error>
+@
+
+<<test-http-rfc4791-7.9.1>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-multiget xmlns:D="DAV:"
+                 xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <D:href>/bernard/work/abcd1.ics</D:href>
+  <D:href>/bernard/work/mtg1.ics</D:href>
+</C:calendar-multiget>
+@
+
+<<response-http-rfc4791-7.9.1>>=
+HTTP/1.1 207 Multi-Status
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+               xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd1.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd1"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001102Z
+DTSTART;TZID=US/Eastern:20060102T100000
+DURATION:PT1H
+SUMMARY:Event #1
+Description:Go Steelers!
+UID:74855313FA803DA593CD579A@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/mtg1.ics</D:href>
+    <D:status>HTTP/1.1 404 Not Found</D:status>
+  </D:response>
+</D:multistatus>
+@
+
+<<test-http-rfc4791-7.10.1>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:free-busy-query xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <C:time-range start="20060104T140000Z"
+                  end="20060105T220000Z"/>
+</C:free-busy-query>
+@
+
+<<response-http-rfc4791-7.10.1>>=
+HTTP/1.1 200 OK
+Date: Sat, 11 Nov 2006 09:32:12 GMT
+Content-Type: text/calendar
+Content-Length: xxxx
+
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Server//EN
+BEGIN:VFREEBUSY
+DTSTAMP:20050125T090000Z
+DTSTART:20060104T140000Z
+DTEND:20060105T220000Z
+FREEBUSY;FBTYPE=BUSY-TENTATIVE:20060104T150000Z/PT1H
+FREEBUSY:20060104T190000Z/PT1H
+END:VFREEBUSY
+END:VCALENDAR
+@
+
+<<test-http-rfc4791-8.2.1.3a>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+                  xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <D:getetag/>
+  </D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="20040902T000000Z"
+                        end="20040903T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-8.2.1.3a>>=
+@
+
+<<test-http-rfc4791-8.2.1.3b>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-multiget xmlns:D="DAV:"
+                     xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop>
+    <D:getetag/>
+    <C:calendar-data/>
+  </D:prop>
+  <D:href>/bernard/work/abcd1.ics</D:href>
+  <D:href>/bernard/work/mtg1.ics</D:href>
+</C:calendar-multiget>
+@
+
+<<response-http-rfc4791-8.2.1.3b>>=
+@
+
+<<test-http-rfc4791-B>>=
+REPORT /bernard/work/ HTTP/1.1
+Host: cal.example.com
+Depth: 1
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<C:calendar-query xmlns:D="DAV:"
+                 xmlns:C="urn:ietf:params:xml:ns:caldav">
+ <D:prop>
+   <D:getetag/>
+   <C:calendar-data/>
+ </D:prop>
+ <C:filter>
+   <C:comp-filter name="VCALENDAR"/>
+ </C:filter>
+</C:calendar-query>
+@
+
+<<response-http-rfc4791-B>>=
+HTTP/1.1 207 Multi-Status
+Content-Type: application/xml; charset="utf-8"
+Content-Length: xxxx
+
+<?xml version="1.0" encoding="utf-8" ?>
+<D:multistatus xmlns:D="DAV:"
+              xmlns:C="urn:ietf:params:xml:ns:caldav">
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd1.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd1"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001102Z
+DTSTART;TZID=US/Eastern:20060102T100000
+DURATION:PT1H
+SUMMARY:Event #1
+Description:Go Steelers!
+UID:74855313FA803DA593CD579A@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd2.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd2"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060102T120000
+DURATION:PT1H
+RRULE:FREQ=DAILY;COUNT=5
+SUMMARY:Event #2
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTAMP:20060206T001121Z
+DTSTART;TZID=US/Eastern:20060104T140000
+DURATION:PT1H
+RECURRENCE-ID;TZID=US/Eastern:20060104T120000
+SUMMARY:Event #2 bis
+UID:00959BC664CA650E933C892C@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd3.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd3"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTIMEZONE
+LAST-MODIFIED:20040110T032845Z
+TZID:US/Eastern
+BEGIN:DAYLIGHT
+DTSTART:20000404T020000
+RRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4
+TZNAME:EDT
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0400
+END:DAYLIGHT
+BEGIN:STANDARD
+DTSTART:20001026T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZNAME:EST
+TZOFFSETFROM:-0400
+TZOFFSETTO:-0500
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+ATTENDEE;PARTSTAT=ACCEPTED;ROLE=CHAIR:mailto:cyrus@example.com
+ATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:lisa@example.com
+DTSTAMP:20060206T001220Z
+DTSTART;TZID=US/Eastern:20060104T100000
+DURATION:PT1H
+LAST-MODIFIED:20060206T001330Z
+ORGANIZER:mailto:cyrus@example.com
+SEQUENCE:1
+STATUS:TENTATIVE
+SUMMARY:Event #3
+UID:DC6C50A017428C5216A2F1CD@example.com
+END:VEVENT
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd4.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd4"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235335Z
+DUE;VALUE=DATE:20060104
+STATUS:NEEDS-ACTION
+SUMMARY:Task #1
+UID:DDDEEB7915FA61233B861457@example.com
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER;RELATED=START:-PT10M
+END:VALARM
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd5.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd5"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235300Z
+DUE;VALUE=DATE:20060106
+LAST-MODIFIED:20060205T235308Z
+SEQUENCE:1
+STATUS:NEEDS-ACTION
+SUMMARY:Task #2
+UID:E10BA47467C5C69BB74E8720@example.com
+BEGIN:VALARM
+ACTION:AUDIO
+TRIGGER;RELATED=START:-PT10M
+END:VALARM
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd6.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd6"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+COMPLETED:20051223T122322Z
+DTSTAMP:20060205T235400Z
+DUE;VALUE=DATE:20051225
+LAST-MODIFIED:20060205T235308Z
+SEQUENCE:1
+STATUS:COMPLETED
+SUMMARY:Task #3
+UID:E10BA47467C5C69BB74E8722@example.com
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd7.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd7"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VTODO
+DTSTAMP:20060205T235600Z
+DUE;VALUE=DATE:20060101
+LAST-MODIFIED:20060205T235308Z
+SEQUENCE:1
+STATUS:CANCELLED
+SUMMARY:Task #4
+UID:E10BA47467C5C69BB74E8725@example.com
+END:VTODO
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+  <D:response>
+    <D:href>http://cal.example.com/bernard/work/abcd8.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"fffff-abcd8"</D:getetag>
+        <C:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Example Corp.//CalDAV Client//EN
+BEGIN:VFREEBUSY
+ORGANIZER;CN="Bernard Desruisseaux":mailto:bernard@example.com
+UID:76ef34-54a3d2@example.com
+DTSTAMP:20050530T123421Z
+DTSTART:20060101T000000Z
+DTEND:20060108T000000Z
+FREEBUSY:20050531T230000Z/20050601T010000Z
+FREEBUSY;FBTYPE=BUSY-TENTATIVE:20060102T100000Z/20060102T120000Z
+FREEBUSY:20060103T100000Z/20060103T120000Z
+FREEBUSY:20060104T100000Z/20060104T120000Z
+FREEBUSY;FBTYPE=BUSY-UNAVAILABLE:20060105T100000Z/20060105T120000Z
+FREEBUSY:20060106T100000Z/20060106T120000Z
+END:VFREEBUSY
+END:VCALENDAR
+</C:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+
+</D:multistatus>
+@
+
+\section{Code Index}
+% This must be last, because l2h always puts it last & ignores the directives
+
+% Make sure chunk naming is consistent
+%  Title = all capitalized
+%  Action = only 1st capitalized
+
+\nowebchunks
+
+% note: no identifier indexing is done right now
+
+\begin{rawhtml}
+<!-->
+%\end{rawhtml}
+%\vspace{1ex}
+%\hrule
+%\vspace{1ex}
+\begin{rawhtml}
+<-->
+\end{rawhtml}
+
+%\nowebindex
+
+\end{document}
