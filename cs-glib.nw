@@ -68,7 +68,7 @@ License.
 \vspace{0.25in}
 
 This document was generated from the following sources, all of which are
-attached:
+attached to the original electronic forms of this document:
 \input{Sources.tex} % txt
 
 \end{abstract}
@@ -942,7 +942,7 @@ rm -f $(GPERF_FILES)
 
 <<makefile.rules>>=
 $(GPERF_C): $(NOWEB_ORDER)
-	root=$(@:%.c.gperf=%); \
+	:; root=$(@:%.c.gperf=%); \
 	noroots $(NOWEB_ORDER) | tr -d '<>' | grep \^$${root}-gperf- | \
 	  while read r; do \
 	    n=$${r#$${root}-gperf-}; \
@@ -957,7 +957,7 @@ $(GPERF_C): $(NOWEB_ORDER)
 	  done >$@
 
 $(GPERF_H): $(NOWEB_ORDER)
-	root=$(@:%.h.gperf=%); \
+	:; root=$(@:%.h.gperf=%); \
 	noroots $(NOWEB_ORDER) | tr -d '<>' | grep \^$${root}-gperf- | \
 	  while read r; do \
 	    n=$${r#$${root}-gperf-}; n=$${n#nc-}; \
@@ -988,12 +988,8 @@ gperf-proto.h: $(GPERF_FILES)
 $(COFILES): gperf-proto.h
 @
 
-<<Build Source>>=
+<<C Headers>>=
 gperf-proto.h \
-@
-
-<<Clean temporary files>>=
-rm -f gperf-proto.h
 @
 
 \lstset{language=C}
