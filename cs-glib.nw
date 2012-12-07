@@ -942,7 +942,10 @@ rm -f $(GPERF_FILES)
 
 <<makefile.rules>>=
 $(GPERF_C): $(NOWEB_ORDER)
-	:; root=$(@:%.c.gperf=%); \
+	@# This for loop is a replacemnt for just setting root= to avoid
+	@# makepp stupidity (otherwise it adds root's value as dep)
+	@#root=$(@:%.c.gperf=%)
+	for root in $(@:%.c.gperf=%); do \
 	noroots $(NOWEB_ORDER) | tr -d '<>' | grep \^$${root}-gperf- | \
 	  while read r; do \
 	    n=$${r#$${root}-gperf-}; \
@@ -954,10 +957,13 @@ $(GPERF_C): $(NOWEB_ORDER)
 	     echo %%; \
 	     notangle -R'Actual gperf lookup function' $(NOWEB_ORDER)) | \
 	       gperf $$nc| sed "s/__GPERF_NAME__/$${n}/g"; \
-	  done >$@
+	  done >$@; done
 
 $(GPERF_H): $(NOWEB_ORDER)
-	:; root=$(@:%.h.gperf=%); \
+	@# This for loop is a replacemnt for just setting root= to avoid
+	@# makepp stupidity (otherwise it adds root's value as dep)
+	@#root=$(@:%.h.gperf=%)
+	for root in $(@:%.h.gperf=%); do \
 	noroots $(NOWEB_ORDER) | tr -d '<>' | grep \^$${root}-gperf- | \
 	  while read r; do \
 	    n=$${r#$${root}-gperf-}; n=$${n#nc-}; \
@@ -966,7 +972,7 @@ $(GPERF_H): $(NOWEB_ORDER)
 	    notangle -R$$r $(NOWEB_ORDER) | tr \  \\n | sort -u | \
 	      sed "s/^/$${n}_/;s/.*/\\U\\0/;s/[^A-Z0-9\\n]/_/g;s/^/,/"; \
 	    echo \} $${n}_t\;; \
-	  done >$@
+	  done >$@; done
 @
 
 <<Build Source>>=
